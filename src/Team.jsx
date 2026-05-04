@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './Shell.jsx';
 import { TEAM as TEAM_DATA } from './data.js';
+import { supabase } from './supabase.js';
 
 function formatTenure(joinedDate, fallback) {
   if (!joinedDate) return fallback || "—";
@@ -170,28 +171,36 @@ function EditCardModal({ member, onClose, onSave }) {
 
 export function TeamPage({ cardStyle }) {
   const { user } = useAuth();
-  const [team, setTeam] = useState(() => {
-    try {
-      const stored = localStorage.getItem("gpx_team");
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return TEAM_DATA;
-  });
-
-  const persistTeam = (next) => {
-    setTeam(next);
-    try { localStorage.setItem("gpx_team", JSON.stringify(next)); }
-    catch (err) { console.warn("Could not persist team:", err); }
-  };
-
+  const [team, setTeam] = useState(TEAM_DATA);
   const [editing, setEditing] = useState(null);
 
-  const handleSave = (updated) => {
+  useEffect(() => {
+    supabase.from('team_members').select('id, section, data')
+      .then(({ data, error }) => {
+        if (error) return;
+        if (data.length === 0) {
+          const rows = Object.entries(TEAM_DATA).flatMap(([section, members]) =>
+            members.map(m => ({ id: m.id, section, data: m }))
+          );
+          supabase.from('team_members').insert(rows);
+        } else {
+          const grouped = {};
+          for (const section of Object.keys(TEAM_DATA)) {
+            const members = data.filter(r => r.section === section).map(r => r.data);
+            if (members.length) grouped[section] = members;
+          }
+          setTeam(grouped);
+        }
+      });
+  }, []);
+
+  const handleSave = async (updated) => {
+    await supabase.from('team_members').update({ data: updated }).eq('id', updated.id);
     const next = {};
     for (const [section, members] of Object.entries(team)) {
       next[section] = members.map((m) => m.id === updated.id ? updated : m);
     }
-    persistTeam(next);
+    setTeam(next);
     setEditing(null);
   };
 

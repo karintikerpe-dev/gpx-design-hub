@@ -9,6 +9,7 @@ import { PromptsPage } from './Prompts.jsx';
 import { TeamPage } from './Team.jsx';
 import { ChallengesPage } from './Challenges.jsx';
 import { ARTICLES } from './data.js';
+import { supabase } from './supabase.js';
 
 const TWEAK_DEFAULTS = {
   newsletterLayout: "magazine",
@@ -27,20 +28,19 @@ export default function App() {
   const [route, setRoute] = useState(parseHash);
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
 
-  const [articles, setArticles] = useState(() => {
-    try {
-      const stored = localStorage.getItem("gpx_articles");
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return ARTICLES;
-  });
+  const [articles, setArticles] = useState(ARTICLES);
 
   useEffect(() => {
-    try { localStorage.setItem("gpx_articles", JSON.stringify(articles)); }
-    catch (err) {
-      console.warn("Could not persist articles (likely quota exceeded — images can be large):", err);
-    }
-  }, [articles]);
+    supabase.from('articles').select('id, data').order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) return;
+        if (data.length === 0) {
+          supabase.from('articles').insert(ARTICLES.map(a => ({ id: a.id, data: a })));
+        } else {
+          setArticles(data.map(r => r.data));
+        }
+      });
+  }, []);
 
   const navTo = (page, articleId = null) => {
     if (page === "article" && articleId) {
@@ -64,14 +64,17 @@ export default function App() {
   const currentArticle = articleId ? articles.find(a => a.id === articleId) : null;
   const navPage = page === "article" ? "newsletter" : page;
 
-  const updateArticle = (updated) => {
+  const updateArticle = async (updated) => {
+    await supabase.from('articles').update({ data: updated }).eq('id', updated.id);
     setArticles(articles.map(a => a.id === updated.id ? updated : a));
   };
-  const deleteArticle = (id) => {
+  const deleteArticle = async (id) => {
+    await supabase.from('articles').delete().eq('id', id);
     setArticles(articles.filter(a => a.id !== id));
     navTo("newsletter");
   };
-  const addArticle = (newA) => {
+  const addArticle = async (newA) => {
+    await supabase.from('articles').insert({ id: newA.id, data: newA });
     setArticles([newA, ...articles]);
   };
 

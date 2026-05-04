@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './Shell.jsx';
 import { brandFromInitials } from './utils.js';
 import { PROMPTS } from './data.js';
+import { supabase } from './supabase.js';
 
 const TOOL_COLORS = {
   "Claude": "#FF6B35",
@@ -171,13 +172,19 @@ function NewPromptModal({ onClose, onSubmit }) {
 
 export function PromptsPage() {
   const { user, setLoginOpen } = useAuth();
-  const [prompts, setPrompts] = useState(() => {
-    try {
-      const stored = localStorage.getItem("gpx_prompts");
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return PROMPTS;
-  });
+  const [prompts, setPrompts] = useState(PROMPTS);
+
+  useEffect(() => {
+    supabase.from('prompts').select('id, data').order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) return;
+        if (data.length === 0) {
+          supabase.from('prompts').insert(PROMPTS.map(p => ({ id: p.id, data: p })));
+        } else {
+          setPrompts(data.map(r => r.data));
+        }
+      });
+  }, []);
 
   const [q, setQ] = useState("");
   const [tool, setTool] = useState("All");
@@ -185,13 +192,6 @@ export function PromptsPage() {
   const [open, setOpen] = useState(null);
   const [composing, setComposing] = useState(false);
   const [copied, setCopied] = useState(null);
-
-  // Persist prompts whenever they change
-  const persistPrompts = (next) => {
-    setPrompts(next);
-    try { localStorage.setItem("gpx_prompts", JSON.stringify(next)); }
-    catch (err) { console.warn("Could not persist prompts:", err); }
-  };
 
   const tools = ["All", ...new Set(prompts.map((p) => p.tool))];
   const cats = ["All", ...new Set(prompts.map((p) => p.category))];
@@ -214,13 +214,14 @@ export function PromptsPage() {
   };
 
   const canDelete = user?.name === "Karin Tikerpe";
-  const handleDelete = (id) => {
-    persistPrompts(prompts.filter((p) => p.id !== id));
+  const handleDelete = async (id) => {
+    await supabase.from('prompts').delete().eq('id', id);
+    setPrompts(prompts.filter((p) => p.id !== id));
   };
 
-  const handleSubmit = (form) => {
+  const handleSubmit = async (form) => {
     const newP = {
-      id: "p" + (Date.now()),
+      id: "p" + Date.now(),
       title: form.title,
       body: form.body,
       tool: form.tool,
@@ -228,11 +229,12 @@ export function PromptsPage() {
       tags: form.tags.split(",").map((s) => s.trim()).filter(Boolean),
       author: user?.name || "You",
       authorInitials: user?.initials || "YOU",
-      date: new Date().toLocaleDateString("en-US",{month:"short", day:"2-digit", year:"numeric"}),
+      date: new Date().toLocaleDateString("en-US", {month:"short", day:"2-digit", year:"numeric"}),
       notes: form.notes,
       favorites: 0,
     };
-    persistPrompts([newP, ...prompts]);
+    await supabase.from('prompts').insert({ id: newP.id, data: newP });
+    setPrompts([newP, ...prompts]);
     setComposing(false);
   };
 
