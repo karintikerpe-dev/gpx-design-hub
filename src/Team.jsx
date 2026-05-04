@@ -197,10 +197,14 @@ export function TeamPage({ cardStyle }) {
   }, []);
 
   const handleSave = async (updated) => {
-    await supabase.from('team_members').update({ data: updated }).eq('id', updated.id);
+    let section = null;
+    for (const [s, members] of Object.entries(team)) {
+      if (members.find(m => m.id === updated.id)) { section = s; break; }
+    }
+    await supabase.from('team_members').upsert({ id: updated.id, section, data: updated });
     const next = {};
-    for (const [section, members] of Object.entries(team)) {
-      next[section] = members.map((m) => m.id === updated.id ? updated : m);
+    for (const [s, members] of Object.entries(team)) {
+      next[s] = members.map((m) => m.id === updated.id ? updated : m);
     }
     setTeam(next);
     setEditing(null);
