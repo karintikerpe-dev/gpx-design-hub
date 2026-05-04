@@ -315,6 +315,7 @@ export const TEAM = {
       contact: "Slack DM or coffee in the kitchen",
       introExtra: 35,
       avatar: "#3AFF3E",
+      photo: "/team/part.jpg",
     },
     {
       id: "t2",
@@ -358,6 +359,7 @@ export const TEAM = {
       contact: "Teams DM",
       introExtra: 55,
       avatar: "#FF8AE6",
+      photo: "/team/karin.jpg",
     },
   ],
   "Product Design": [
@@ -374,6 +376,7 @@ export const TEAM = {
       contact: "Slack any time, even weekends — please don't",
       introExtra: 60,
       avatar: "#01963A",
+      photo: "/team/mari-liis.jpg",
     },
     {
       id: "t6",
@@ -388,6 +391,7 @@ export const TEAM = {
       contact: "Coffee — book his calendar",
       introExtra: 45,
       avatar: "#0070F3",
+      photo: "/team/martin.jpg",
     },
     {
       id: "t7",

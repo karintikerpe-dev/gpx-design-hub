@@ -53,8 +53,10 @@ function TeamCard({ member, style, isMe, onEdit }) {
     <article className={"team-card style-" + style + (isMe ? " is-me" : "")}>
       {isMe && <button className="edit-pill" onClick={() => onEdit(member)}>✎ Edit my card</button>}
       <div className="tc-photo" style={{ background: member.avatar }}>
-        <span className="tc-monogram">{member.initials}</span>
-        <PhotoArt seed={member.id} />
+        {member.photo
+          ? <img src={member.photo} alt={member.name} className="tc-photo-img" />
+          : <><span className="tc-monogram">{member.initials}</span><PhotoArt seed={member.id} /></>
+        }
       </div>
       <div className="tc-body">
         <div className="tc-head">
