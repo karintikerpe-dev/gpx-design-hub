@@ -35,7 +35,7 @@ export default function App() {
       .then(({ data, error }) => {
         if (error) return;
         if (data.length === 0) {
-          supabase.from('articles').insert(ARTICLES.map(a => ({ id: a.id, data: a })));
+          supabase.from('articles').upsert(ARTICLES.map(a => ({ id: a.id, data: a })));
         } else {
           setArticles(data.map(r => r.data));
         }

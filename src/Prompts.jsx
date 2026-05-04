@@ -179,7 +179,7 @@ export function PromptsPage() {
       .then(({ data, error }) => {
         if (error) return;
         if (data.length === 0) {
-          supabase.from('prompts').insert(PROMPTS.map(p => ({ id: p.id, data: p })));
+          supabase.from('prompts').upsert(PROMPTS.map(p => ({ id: p.id, data: p })));
         } else {
           setPrompts(data.map(r => r.data));
         }

@@ -184,7 +184,7 @@ export function TeamPage({ cardStyle }) {
           const rows = Object.entries(TEAM_DATA).flatMap(([section, members]) =>
             members.map(m => ({ id: m.id, section, data: m }))
           );
-          supabase.from('team_members').insert(rows);
+          supabase.from('team_members').upsert(rows);
         } else {
           const grouped = {};
           for (const section of Object.keys(TEAM_DATA)) {
