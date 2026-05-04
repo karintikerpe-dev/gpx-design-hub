@@ -435,6 +435,20 @@ export const TEAM = {
       introExtra: 50,
       avatar: "#FFD23F",
     },
+    {
+      id: "t8c",
+      name: "Hiep Le",
+      initials: "HL",
+      role: "Product Designer",
+      office: "Helsinki",
+      officeFreq: 60,
+      joined: "2 years ago",
+      hobbies: ["Photography", "Cycling", "Cooking"],
+      funFact: "Once won a local photography competition with a picture taken on his phone.",
+      contact: "Slack DM",
+      introExtra: 55,
+      avatar: "#3AFF3E",
+    },
   ],
   "UI Development": [
     {
