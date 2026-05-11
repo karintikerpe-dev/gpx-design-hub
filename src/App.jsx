@@ -8,6 +8,7 @@ import { ArticlePage } from './ArticlePage.jsx';
 import { PromptsPage } from './Prompts.jsx';
 import { TeamPage } from './Team.jsx';
 import { ChallengesPage } from './Challenges.jsx';
+import { AiFirstDeliveryPage } from './AiFirstDelivery.jsx';
 import { ARTICLES } from './data.js';
 import { supabase } from './supabase.js';
 
@@ -20,7 +21,7 @@ const TWEAK_DEFAULTS = {
 function parseHash() {
   const raw = (location.hash || "").replace(/^#/, "");
   if (raw.startsWith("article/")) return { page: "article", articleId: raw.slice("article/".length) };
-  if (["newsletter","prompts","team","challenges"].includes(raw)) return { page: raw, articleId: null };
+  if (["newsletter","ai-first-delivery","team","challenges"].includes(raw)) return { page: raw, articleId: null };
   return { page: "newsletter", articleId: null };
 }
 
@@ -96,8 +97,8 @@ export default function App() {
       {page === "newsletter" && <NewsletterPage layout={t.newsletterLayout}
         articles={articles} onAdd={addArticle}
         onOpen={(id) => navTo("article", id)}/>}
-      {page === "prompts" && <PromptsPage/>}
-      {page === "team" && <TeamPage cardStyle={t.teamCardStyle}/>}
+{page === "team" && <TeamPage cardStyle={t.teamCardStyle}/>}
+      {page === "ai-first-delivery" && <AiFirstDeliveryPage/>}
       {page === "challenges" && <ChallengesPage/>}
       <Footer/>
 

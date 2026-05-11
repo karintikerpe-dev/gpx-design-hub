@@ -99,8 +99,8 @@ export function TopNav({ page, onNav }) {
         <nav className="nav-links">
           {[
             { id: "newsletter", label: "Newsletter" },
+            { id: "ai-first-delivery", label: "AI-first delivery" },
             { id: "challenges", label: "Design Challenge" },
-            { id: "prompts", label: "Prompt Library" },
             { id: "team", label: "Team" },
           ].map((n) => (
             <a key={n.id} href="#" className={"nav-link" + (page === n.id ? " active" : "")}
